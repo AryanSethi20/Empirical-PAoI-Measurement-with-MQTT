@@ -121,77 +121,8 @@ def preprocess_paoi_measurements():
             'PAoI': PAoI
         })
 
-##
-# This function plots the results for PAoI CDF vs thres
-"""def plot_PAoI_violation_probability_vs_thres():
-    # Load results
-    numerical_results = spio.loadmat(empirical_dirpath + '/CU_PAoI.mat')
-    PAoI_CU_policy  = numerical_results['PAoI'][0]
-
-    numerical_results = spio.loadmat(empirical_dirpath + '/ZW_PAoI.mat')
-    PAoI_ZW_policy  = numerical_results['PAoI'][0]
-
-    print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": Median PAoI CU Policy: {:.4f}s".format(np.median(PAoI_CU_policy)))
-    print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": Median PAoI ZW Policy: {:.4f}s".format(np.median(PAoI_ZW_policy)))
-    print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": Mean PAoI CU Policy: {:.4f}s".format(np.mean(PAoI_CU_policy)))
-    print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": Mean PAoI ZW Policy: {:.4f}s".format(np.mean(PAoI_ZW_policy)))
-    print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": PAoI CU Policy Variance: {:.4f}s".format(np.var(PAoI_CU_policy)))
-    print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": PAoI ZW Policy Variance: {:.4f}s".format(np.var(PAoI_ZW_policy)))
-
-    # Initialise variables
-    _min = 0 # tested 0.1
-    _max = 0.8 # tested 0.8
-    _step = 0.01
-    thres = np.arange(start=_min, stop=_max + _step, step=_step)
-
-    PAoI_violation_prob_CU_policy = [len(PAoI_CU_policy[PAoI_CU_policy>thres[i]])/len(PAoI_CU_policy) for i in range(len(thres))]
-    PAoI_violation_prob_ZW_policy = [len(PAoI_ZW_policy[PAoI_ZW_policy>thres[i]])/len(PAoI_ZW_policy) for i in range(len(thres))]
-
-    # Plot results
-    lines = plt.semilogy(
-        thres, PAoI_violation_prob_CU_policy,
-        thres, PAoI_violation_prob_ZW_policy,
-    )
-    plt.setp(lines[0], 'marker', 'o')
-    plt.setp(lines[1], 'marker', 's')
-
-    plt.legend(\
-        (lines[0], lines[1]), \
-        (
-            'CU Policy',
-            'ZW Policy',
-        ), fontsize=8, loc='best')
-    
-    plt.xlabel(r'Threshold (s)')
-    plt.ylabel("PAoI Violation Probability")
-    # plt.ylim(8e-4, 1e-1)
-    
-    plt.grid(True, which="both")
-    plt.savefig(fname = "./figures/plot_PAoI_violation_probability_vs_thres.eps", format="eps")
-    plt.show()
-"""
-
 def plot_mean_PAoI_vs_mean_service_time():
-    # Load results
-    numerical_results = spio.loadmat(empirical_dirpath + '/CU_PAoI.mat')
-    PAoI_CU_policy = numerical_results['PAoI'][0]
-
-    numerical_results = spio.loadmat(empirical_dirpath + '/ZW_PAoI.mat')
-    PAoI_ZW_policy = numerical_results['PAoI'][0]
-
-    # Calculate the average PAoI for each policy
-    average_PAoI_CU = np.mean(PAoI_CU_policy)
-    average_PAoI_ZW = np.mean(PAoI_ZW_policy)
-
-    mean_service_times = np.linspace(0, 0.8, 100)
-
-    plt.xlabel('Mean Service Time (s)')
-    plt.ylabel('Mean PAoI (s)')
-    plt.title('Mean PAoI vs. Mean Service Time')
-    plt.legend()
-    plt.grid(True)
-    plt.savefig(fname="./figures/plot_mean_PAoI_vs_mean_service_time.eps", format="eps")
-    plt.show()
+    pass
 
 ##
 # This function runs the main function
