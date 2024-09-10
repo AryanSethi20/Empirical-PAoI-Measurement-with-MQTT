@@ -1,0 +1,14 @@
+{
+    "broker": "0.0.0.0",
+    "port": 1883,
+    "status_update_topic": "artc1/status_update",
+    "ack_topic": "artc1/ack",
+    "ZW_policy": true,
+    "config_dirpath": "./config",
+    "empirical_dirpath": "./empirical_results",
+    "config_filename": "config_sub.json",
+    "log_filename": "PAoI.txt",
+    "mat_filename": "PAoI.mat",
+    "numSamples": 1000,
+    "minSamples": 500
+}
