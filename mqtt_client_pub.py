@@ -82,7 +82,7 @@ def policy_daemon(client: mqtt_client):
         status_update = json.dumps(
             {
                 "generation_time": time.time(),
-                "service_time": np.random.exponential(scale=1/mu),
+                "mu": mu,
                 "lamb": lamb,
                 "idx": idx,
             }
@@ -168,7 +168,7 @@ if __name__ == "__main__":
             else:
                 status_update_topic = status_update_topic + "/CU"
 
-    service_times = np.arange(0.1, 1.01, 0.05)
+    service_times = np.arange(1, 5.1, 0.5)
 
     for service_time in service_times:
         mu = service_time

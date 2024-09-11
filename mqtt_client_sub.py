@@ -45,7 +45,8 @@ def on_message(client, userdata, msg):
     idx = status_update["idx"]
 
     # Delay added to simulate service time
-    service_time = status_update["service_time"]
+    mu = status_update["mu"]
+    service_time = np.random.exponential(scale=1/mu)
     time.sleep(service_time)
 
     # Measure empirical PAoI

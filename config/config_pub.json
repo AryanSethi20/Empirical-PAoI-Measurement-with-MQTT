@@ -3,7 +3,7 @@
     "port": 1883,
     "status_update_topic": "artc1/status_update",
     "ack_topic": "artc1/ack",
-    "ZW_policy": true,
+    "ZW_policy": false,
     "config_dirpath": "./config",
     "config_filename": "config_pub.json",
     "lamb": 3,
