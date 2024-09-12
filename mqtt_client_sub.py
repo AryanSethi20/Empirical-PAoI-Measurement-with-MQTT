@@ -47,10 +47,10 @@ def on_message(client, userdata, msg):
     # Delay added to simulate service time
     mu = status_update["mu"]
     service_time = np.random.exponential(scale=1/mu)
-    time.sleep(service_time)
+    # time.sleep(service_time)
 
     # Measure empirical PAoI
-    PAoI_measured = time.time() - generation_time
+    PAoI_measured = time.time() - generation_time + service_time
     
     # Log empirical PAoI if it is positive, i.e., measured PAoI is not affected by timing mismatch between publisher and subscriber
     if PAoI_measured >= 0:
@@ -64,10 +64,10 @@ def on_message(client, userdata, msg):
             service_time_logfile.close()
     
         # Stop PAoI measurement if number of samples collected exceed numSamples
-        with open(empirical_dirpath + "/" + log_filename, 'r') as paoi_logfile:
-            if len(paoi_logfile.readlines()) > numSamples:
-                measurement_completed_flag.set()
-            paoi_logfile.close()
+        # with open(empirical_dirpath + "/" + log_filename, 'r') as paoi_logfile:
+        #     if len(paoi_logfile.readlines()) > numSamples:
+        #         measurement_completed_flag.set()
+        #     paoi_logfile.close()
             
         print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": Status Update Index {:n}\t PAoI: {:.4f}s\t Service Time: {:.4f}s".format(idx, PAoI_measured, service_time))
     

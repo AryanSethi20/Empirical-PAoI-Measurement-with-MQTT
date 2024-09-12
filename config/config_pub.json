@@ -6,6 +6,6 @@
     "ZW_policy": false,
     "config_dirpath": "./config",
     "config_filename": "config_pub.json",
-    "lamb": 3,
+    "lamb": 0.1,
     "mu": 3
 }
