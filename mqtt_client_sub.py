@@ -18,16 +18,18 @@ empirical_dirpath = "./empirical_results"
 config_filename = "config_sub.json"
 log_filename = "PAoI.txt"
 mat_filename = 'PAoI.mat'
+service_time_filename = 'ServiceTime.txt'
 generation_time = 0
 numSamples = int(1e5)
 minSamples = int(1e3)
 
-# Generate a Client ID with the subscribe prefix.
-client_id = f'subscribe-{random.randint(0, 100)}'
-
 # Date and time format
 dateFormat = '%Y-%m-%d'
 timeFormat = '%H-%M-%S.%f'
+
+# Generate a Client ID with the subscribe prefix.
+def create_client_id() -> str:
+    return f'subscribe-{random.randint(0, 100)}'
 
 ##
 # This function handles the callback when the broker reponds to the client's MQTT connection request.
@@ -59,15 +61,15 @@ def on_message(client, userdata, msg):
             paoi_logfile.close()
 
         # Logs of the service_time for that particular update
-        with open(empirical_dirpath + "/ServiceTime.txt", 'a') as service_time_logfile:
+        with open(empirical_dirpath + "/" + service_time_filename, 'a') as service_time_logfile:
             service_time_logfile.write(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": {:.4f}\n".format(service_time))
             service_time_logfile.close()
     
         # Stop PAoI measurement if number of samples collected exceed numSamples
-        # with open(empirical_dirpath + "/" + log_filename, 'r') as paoi_logfile:
-        #     if len(paoi_logfile.readlines()) > numSamples:
-        #         measurement_completed_flag.set()
-        #     paoi_logfile.close()
+        with open(empirical_dirpath + "/" + log_filename, 'r') as paoi_logfile:
+            if len(paoi_logfile.readlines()) >= numSamples:
+                measurement_completed_flag.set()
+            paoi_logfile.close()
             
         print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": Status Update Index {:n}\t PAoI: {:.4f}s\t Service Time: {:.4f}s".format(idx, PAoI_measured, service_time))
     
@@ -129,7 +131,7 @@ def plot_mean_PAoI_vs_mean_service_time():
 # This function runs the main function
 def main():
     # Initialise and start MQTT connection
-    client = mqtt_client.Client(client_id)
+    client = mqtt_client.Client(create_client_id())
     client.on_connect = on_connect
     client.connect(broker, port)
     client.on_message = on_message
@@ -200,17 +202,36 @@ if __name__ == '__main__':
             config_filename = config_dict["config_filename"]
             log_filename = config_dict["log_filename"]
             mat_filename = config_dict["mat_filename"]
+            service_time_filename = config_dict["service_time_filename"]
             numSamples = config_dict["numSamples"]
             minSamples = config_dict["minSamples"]
-
+    
+    service_times = np.arange(1, 5.1, 0.5)
+    
+    idx = 1
+    while True:
+        if idx > len(service_times):
+            break
+        print(f"========================= {idx} ==============================")
+        if idx == 1:
             if ZW_policy:
-                log_filename = "ZW_" + log_filename
-                mat_filename = "ZW_" + mat_filename
                 status_update_topic = status_update_topic + "/ZW"
-                ZW_policy_flag.set()
             else:
-                log_filename = "CU_" + log_filename
-                mat_filename = "CU_" + mat_filename
                 status_update_topic = status_update_topic + "/CU"
 
-    main()
+        if ZW_policy:
+            log_filename = "ZW_"
+            mat_filename = "ZW_"
+            service_time_filename = "ZW_"
+            ZW_policy_flag.set()
+        else:
+            log_filename = "CU_"
+            mat_filename = "CU_"
+            service_time_filename = "CU_"
+        
+        log_filename = log_filename + f"PAoI-{idx}.txt"
+        mat_filename = mat_filename + f"PAoI-{idx}.mat"
+        service_time_filename = service_time_filename + f'ServiceTime-{idx}.txt'
+        main()
+        measurement_completed_flag.clear()
+        idx += 1

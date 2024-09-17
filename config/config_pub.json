@@ -3,9 +3,10 @@
     "port": 1883,
     "status_update_topic": "artc1/status_update",
     "ack_topic": "artc1/ack",
-    "ZW_policy": false,
+    "ZW_policy": true,
     "config_dirpath": "./config",
     "config_filename": "config_pub.json",
-    "lamb": 0.1,
-    "mu": 3
+    "lamb": 1,
+    "mu": 3,
+    "numSamples": 2000
 }

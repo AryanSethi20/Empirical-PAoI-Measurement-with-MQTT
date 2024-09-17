@@ -14,16 +14,16 @@ lamb = 3  # Average number of updates
 mu = 3  # Service time of updates
 config_dirpath = "./config"
 config_filename = "config_pub.json"
-
-# Generate a Client ID with the publish prefix.
-client_id = f"publish-{random.randint(0, 1000)}"
+numSamples = 50
 
 # Date and time format
 dateFormat = "%Y-%m-%d"
 timeFormat = "%H-%M-%S.%f"
 
+# Generate a Client ID with the publish prefix.
+def create_client_id() -> str:
+    return f"publish-{random.randint(0, 1000)}"
 
-##
 # This function handles the callback when the broker reponds to the client's MQTT connection request.
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
@@ -38,8 +38,6 @@ def on_connect(client, userdata, flags, rc):
             + ": Failed to connect, return code {:n}".format(rc)
         )
 
-
-##
 # This function handles the callback when a message has been received on a topic that the client subscribes to.
 def on_message(client, userdata, msg):
     if ZW_policy_flag.is_set():
@@ -99,13 +97,15 @@ def policy_daemon(client: mqtt_client):
         # Simulate interarrival delay
         time.sleep(lamb)  # sensor sends data at periodic intervals
         idx += 1
+        if idx > numSamples:
+            break
 
 
 ##
 # This function runs the main function
 def main():
     # Initialise and start MQTT connection
-    client = mqtt_client.Client(client_id)
+    client = mqtt_client.Client(client_id=create_client_id())
     client.on_connect = on_connect
     client.connect(broker, port)
 
@@ -139,6 +139,7 @@ if __name__ == "__main__":
             "config_filename": config_filename,
             "lamb": lamb,
             "mu": mu,
+            "numSamples": numSamples,
         }
 
         with open(config_dirpath + "/" + config_filename, "w") as config:
@@ -160,6 +161,7 @@ if __name__ == "__main__":
             config_filename = config_dict["config_filename"]
             lamb = config_dict["lamb"]
             mu = config_dict["mu"]
+            numSamples = config_dict["numSamples"]
 
             # Initialise ZW_policy_flag
             if ZW_policy:
@@ -172,4 +174,6 @@ if __name__ == "__main__":
 
     for service_time in service_times:
         mu = service_time
+        print(f"========================= Service Time: {mu} ==============================")
         main()
+        time.sleep(10)
