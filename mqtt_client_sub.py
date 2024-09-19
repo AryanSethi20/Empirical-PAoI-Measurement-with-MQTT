@@ -4,6 +4,7 @@ from paho.mqtt import client as mqtt_client
 from threading import *
 from scipy import io as spio
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
 broker = 'broker.emqx.io'
 port = 1883
@@ -14,7 +15,7 @@ ack_flag = Event() # Flag variable for communications between threads
 measurement_completed_flag = Event() # Flag variable for communications between threads
 ZW_policy_flag = Event() # Flag variable for communications between threads
 config_dirpath = "./config"
-empirical_dirpath = "./empirical_results"
+empirical_dirpath = "./Results/empirical_results_lambda=1"
 config_filename = "config_sub.json"
 log_filename = "PAoI.txt"
 mat_filename = 'PAoI.mat'
@@ -26,6 +27,9 @@ minSamples = int(1e3)
 # Date and time format
 dateFormat = '%Y-%m-%d'
 timeFormat = '%H-%M-%S.%f'
+
+# Constants for lambda for simulation purpose
+addition_arrival_time_simulation = 9
 
 # Generate a Client ID with the subscribe prefix.
 def create_client_id() -> str:
@@ -52,7 +56,8 @@ def on_message(client, userdata, msg):
     # time.sleep(service_time)
 
     # Measure empirical PAoI
-    PAoI_measured = time.time() - generation_time + service_time
+    # Extra time is added to simulate the lambda time
+    PAoI_measured = time.time() - generation_time + service_time + addition_arrival_time_simulation
     
     # Log empirical PAoI if it is positive, i.e., measured PAoI is not affected by timing mismatch between publisher and subscriber
     if PAoI_measured >= 0:
@@ -85,7 +90,7 @@ def on_message(client, userdata, msg):
 def ZW_policy_ack_daemon(client: mqtt_client):
     while True:
         # Await ACK from the subscriber client
-        ack_flag.wait(10)
+        ack_flag.wait(15)
         
         if ZW_policy_flag.is_set():
             # Publish ACK for each status update to ack_topic
@@ -125,7 +130,97 @@ def preprocess_paoi_measurements():
         })
 
 def plot_mean_PAoI_vs_mean_service_time():
-    pass
+    mean_paoi_cu = []
+    mean_paoi_zw = []
+    for idx in range(1,10):
+        numerical_results = spio.loadmat(empirical_dirpath + f"/CU_PAoI-{idx}.mat")
+        PAoI_CU_policy = numerical_results['PAoI'][0]
+        
+        numerical_results = spio.loadmat(empirical_dirpath + f"/ZW_PAoI-{idx}.mat")
+        PAoI_ZW_policy = numerical_results['PAoI'][0]
+
+        mean_paoi_cu.append(np.mean(PAoI_CU_policy))
+        mean_paoi_zw.append(np.mean(PAoI_ZW_policy))
+
+    service_times = np.arange(1, 5.1, 0.5)
+
+    # Plot results
+    lines = plt.semilogy(
+        service_times, mean_paoi_cu,
+        service_times, mean_paoi_zw,
+    )
+    
+    plt.setp(lines[0], 'marker', 'o')
+    plt.setp(lines[1], 'marker', 's')
+    plt.legend(\
+        (lines[0], lines[1]), \
+        (
+            'CU Policy',
+            'ZW Policy',
+        ), fontsize=8, loc='best')
+    
+    plt.xlabel(r'Mean Service Time (s)')
+    plt.ylabel("Mean PAoI (s)")
+    
+    ax = plt.gca()
+    ax.set_xlim([0.8, 5.5])
+    ax.set_ylim([0.1, 3.5])
+    ax.set_yticks([float(i) for i in np.arange(0, 3.6, 0.5)])
+    ax.yaxis.set_major_formatter(ticker.ScalarFormatter())
+    ax.ticklabel_format(style='plain', axis='y')
+
+    # plt.ylim(8e-4, 1e-1)
+    plt.grid(True, which="both")
+    plt.savefig(fname = "./figures/plot_mean_PAoI_vs_mean_service_time.eps", format="eps")
+    plt.show()
+
+# This function plots the results for PAoI CDF vs thres
+def plot_PAoI_violation_probability_vs_thres():
+    # Load results
+    numerical_results = spio.loadmat(empirical_dirpath + '/CU_PAoI.mat')
+    PAoI_CU_policy  = numerical_results['PAoI'][0]
+
+    numerical_results = spio.loadmat(empirical_dirpath + '/ZW_PAoI.mat')
+    PAoI_ZW_policy  = numerical_results['PAoI'][0]
+
+    print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": Median PAoI CU Policy: {:.4f}s".format(np.median(PAoI_CU_policy)))
+    print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": Median PAoI ZW Policy: {:.4f}s".format(np.median(PAoI_ZW_policy)))
+    print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": Mean PAoI CU Policy: {:.4f}s".format(np.mean(PAoI_CU_policy)))
+    print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": Mean PAoI ZW Policy: {:.4f}s".format(np.mean(PAoI_ZW_policy)))
+    print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": PAoI CU Policy Variance: {:.4f}s".format(np.var(PAoI_CU_policy)))
+    print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": PAoI ZW Policy Variance: {:.4f}s".format(np.var(PAoI_ZW_policy)))
+
+    # Initialise variables
+    _min = 0 # tested 0.1
+    _max = 0.3 # tested 0.8
+    _step = 0.01
+    thres = np.arange(start=_min, stop=_max + _step, step=_step)
+
+    PAoI_violation_prob_CU_policy = [len(PAoI_CU_policy[PAoI_CU_policy>thres[i]])/len(PAoI_CU_policy) for i in range(len(thres))]
+    PAoI_violation_prob_ZW_policy = [len(PAoI_ZW_policy[PAoI_ZW_policy>thres[i]])/len(PAoI_ZW_policy) for i in range(len(thres))]
+
+    # Plot results
+    lines = plt.semilogy(
+        thres, PAoI_violation_prob_CU_policy,
+        thres, PAoI_violation_prob_ZW_policy,
+    )
+    plt.setp(lines[0], 'marker', 'o')
+    plt.setp(lines[1], 'marker', 's')
+
+    plt.legend(\
+        (lines[0], lines[1]), \
+        (
+            'CU Policy',
+            'ZW Policy',
+        ), fontsize=8, loc='best')
+    
+    plt.xlabel(r'Threshold (s)')
+    plt.ylabel("PAoI Violation Probability")
+    # plt.ylim(8e-4, 1e-1)
+    
+    plt.grid(True, which="both")
+    plt.savefig(fname = "./figures/plot_PAoI_violation_probability_vs_thres.eps", format="eps")
+    plt.show()
 
 ##
 # This function runs the main function
@@ -208,12 +303,13 @@ if __name__ == '__main__':
     
     service_times = np.arange(1, 5.1, 0.5)
     
-    idx = 1
+    idx = 9
     while True:
         if idx > len(service_times):
             break
         print(f"========================= {idx} ==============================")
-        if idx == 1:
+        if idx == 9:
+        # if idx == 1:
             if ZW_policy:
                 status_update_topic = status_update_topic + "/ZW"
             else:

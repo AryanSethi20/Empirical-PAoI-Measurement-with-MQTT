@@ -90,8 +90,8 @@ def policy_daemon(client: mqtt_client):
         publish_status_update(client, status_update, status_update_topic, idx)
 
         if ZW_policy_flag.is_set():
-            # Await ACK from the subscriber client, timeout after 10 seconds
-            ack_flag.wait(10)
+            # Await ACK from the subscriber client, timeout after 15 seconds
+            ack_flag.wait(15)
             ack_flag.clear()
 
         # Simulate interarrival delay
@@ -170,10 +170,11 @@ if __name__ == "__main__":
             else:
                 status_update_topic = status_update_topic + "/CU"
 
-    service_times = np.arange(1, 5.1, 0.5)
+    # service_times = np.arange(1, 5.1, 0.5)
 
-    for service_time in service_times:
-        mu = service_time
-        print(f"========================= Service Time: {mu} ==============================")
-        main()
-        time.sleep(10)
+    # for service_time in service_times:
+        # mu = service_time
+    mu = 5.0
+    print(f"========================= Service Time: {mu} ==============================")
+    main()
+    time.sleep(10)

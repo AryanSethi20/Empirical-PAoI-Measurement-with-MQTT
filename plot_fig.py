@@ -2,8 +2,8 @@ from mqtt_client_sub import * # imports python script to call the plotting funct
 
 def main():    
     # Plot results
-    # plot_PAoI_violation_probability_vs_thres()
-    plot_average_PAoI()
+    plot_mean_PAoI_vs_mean_service_time()
+
 # Runs main()
 if __name__ == "__main__":
     main()
