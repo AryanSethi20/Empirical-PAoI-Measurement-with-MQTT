@@ -301,13 +301,13 @@ if __name__ == '__main__':
             numSamples = config_dict["numSamples"]
             minSamples = config_dict["minSamples"]
     
-    service_times = np.arange(1, 5.1, 0.5)
+    service_times = np.arange(5.5, 10.1, 0.5)
     
-    idx = 9
+    idx = 1
     while True:
         if idx > len(service_times):
             break
-        print(f"========================= {idx} ==============================")
+        print(f"========================= {9 + idx} ==============================")
         if idx == 9:
         # if idx == 1:
             if ZW_policy:
@@ -325,9 +325,9 @@ if __name__ == '__main__':
             mat_filename = "CU_"
             service_time_filename = "CU_"
         
-        log_filename = log_filename + f"PAoI-{idx}.txt"
-        mat_filename = mat_filename + f"PAoI-{idx}.mat"
-        service_time_filename = service_time_filename + f'ServiceTime-{idx}.txt'
+        log_filename = log_filename + f"PAoI-{9 + idx}.txt"
+        mat_filename = mat_filename + f"PAoI-{9 + idx}.mat"
+        service_time_filename = service_time_filename + f'ServiceTime-{9 + idx}.txt'
         main()
         measurement_completed_flag.clear()
         idx += 1

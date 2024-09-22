@@ -1,5 +1,5 @@
 {
-    "broker": "0.0.0.0",
+    "broker": "broker.emqx.io",
     "port": 1883,
     "status_update_topic": "artc1/status_update",
     "ack_topic": "artc1/ack",
@@ -8,5 +8,5 @@
     "config_filename": "config_pub.json",
     "lamb": 1,
     "mu": 3,
-    "numSamples": 2000
+    "numSamples": 5000
 }

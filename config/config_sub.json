@@ -1,5 +1,5 @@
 {
-    "broker": "0.0.0.0",
+    "broker": "broker.emqx.io",
     "port": 1883,
     "status_update_topic": "artc1/status_update",
     "ack_topic": "artc1/ack",
@@ -10,6 +10,6 @@
     "log_filename": "PAoI.txt",
     "mat_filename": "PAoI.mat",
     "service_time_filename": "ServiceTime.txt",
-    "numSamples": 2000,
-    "minSamples": 1000
+    "numSamples": 5000,
+    "minSamples": 200
 }

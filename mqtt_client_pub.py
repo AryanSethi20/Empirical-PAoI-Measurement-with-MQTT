@@ -170,11 +170,10 @@ if __name__ == "__main__":
             else:
                 status_update_topic = status_update_topic + "/CU"
 
-    # service_times = np.arange(1, 5.1, 0.5)
+    service_times = np.arange(5.5, 10.1, 0.5)
 
-    # for service_time in service_times:
-        # mu = service_time
-    mu = 5.0
-    print(f"========================= Service Time: {mu} ==============================")
-    main()
-    time.sleep(10)
+    for service_time in service_times:
+        mu = service_time
+        print(f"========================= Service Time: {mu} ==============================")
+        main()
+        time.sleep(10)
