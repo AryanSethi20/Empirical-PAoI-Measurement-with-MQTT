@@ -5,15 +5,18 @@ from threading import *
 
 broker = "broker.emqx.io"
 port = 1883
-status_update_topic = "artc/status_update"
-ack_topic = "artc/ack"
+# status_update_topic = "artc/status_update"
+status_update_topic = "artc1/status_update-lambda-10"
+# ack_topic = "artc/ack"
+ack_topic = "artc1/ack-lambda-10"
 ZW_policy = True
 ack_flag = Event()  # Flag variable for communications between threads
 ZW_policy_flag = Event()  # Flag variable for communications between threads
 lamb = 3  # Average number of updates
 mu = 3  # Service time of updates
 config_dirpath = "./config"
-config_filename = "config_pub.json"
+# config_filename = "config_pub.json"
+config_filename = "config_pub-lambda_10.json"
 numSamples = 50
 
 # Date and time format
@@ -71,8 +74,6 @@ def publish_status_update(client, status_update, topic, idx):
             + topic
         )
 
-
-##
 # This function publishes status updates on MQTT under the ZW or CU policy
 def policy_daemon(client: mqtt_client):
     idx = 1
@@ -170,7 +171,7 @@ if __name__ == "__main__":
             else:
                 status_update_topic = status_update_topic + "/CU"
 
-    service_times = np.arange(5.5, 10.1, 0.5)
+    service_times = np.arange(0.5, 10.1, 0.5)
 
     for service_time in service_times:
         mu = service_time

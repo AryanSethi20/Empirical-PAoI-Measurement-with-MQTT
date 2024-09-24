@@ -1,0 +1,12 @@
+{
+    "broker": "broker.emqx.io",
+    "port": 1883,
+    "status_update_topic": "artc1/status_update-lambda-10",
+    "ack_topic": "artc1/ack-lambda-10",
+    "ZW_policy": true,
+    "config_dirpath": "./config",
+    "config_filename": "config_pub-lambda_10.json",
+    "lamb": 1,
+    "mu": 3,
+    "numSamples": 5000
+}

@@ -8,15 +8,19 @@ import matplotlib.ticker as ticker
 
 broker = 'broker.emqx.io'
 port = 1883
-status_update_topic = "artc/status_update"
-ack_topic = "artc/ack"
+# status_update_topic = "artc1/status_update"
+status_update_topic = "artc1/status_update-lambda-10"
+# ack_topic = "artc1/ack"
+ack_topic = "artc1/ack-lambda-10"
 ZW_policy = True
 ack_flag = Event() # Flag variable for communications between threads
 measurement_completed_flag = Event() # Flag variable for communications between threads
 ZW_policy_flag = Event() # Flag variable for communications between threads
 config_dirpath = "./config"
-empirical_dirpath = "./Results/empirical_results_lambda=1"
-config_filename = "config_sub.json"
+# empirical_dirpath = "./empirical_results"
+empirical_dirpath = "./empirical_results-lambda=10"
+# config_filename = "config_sub.json"
+config_filename = "config_sub-lambda_10.json"
 log_filename = "PAoI.txt"
 mat_filename = 'PAoI.mat'
 service_time_filename = 'ServiceTime.txt'
@@ -29,6 +33,7 @@ dateFormat = '%Y-%m-%d'
 timeFormat = '%H-%M-%S.%f'
 
 # Constants for lambda for simulation purpose
+# FIXME: Always change to adjust what lambda you want
 addition_arrival_time_simulation = 9
 
 # Generate a Client ID with the subscribe prefix.
@@ -159,7 +164,7 @@ def plot_mean_PAoI_vs_mean_service_time():
             'ZW Policy',
         ), fontsize=8, loc='best')
     
-    plt.xlabel(r'Mean Service Time (s)')
+    plt.xlabel(r'Mean Service Rate')
     plt.ylabel("Mean PAoI (s)")
     
     ax = plt.gca()
@@ -171,58 +176,9 @@ def plot_mean_PAoI_vs_mean_service_time():
 
     # plt.ylim(8e-4, 1e-1)
     plt.grid(True, which="both")
-    plt.savefig(fname = "./figures/plot_mean_PAoI_vs_mean_service_time.eps", format="eps")
+    plt.savefig(fname = "./figures/plot_mean_PAoI_vs_mean_service_rate.eps", format="eps")
     plt.show()
 
-# This function plots the results for PAoI CDF vs thres
-def plot_PAoI_violation_probability_vs_thres():
-    # Load results
-    numerical_results = spio.loadmat(empirical_dirpath + '/CU_PAoI.mat')
-    PAoI_CU_policy  = numerical_results['PAoI'][0]
-
-    numerical_results = spio.loadmat(empirical_dirpath + '/ZW_PAoI.mat')
-    PAoI_ZW_policy  = numerical_results['PAoI'][0]
-
-    print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": Median PAoI CU Policy: {:.4f}s".format(np.median(PAoI_CU_policy)))
-    print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": Median PAoI ZW Policy: {:.4f}s".format(np.median(PAoI_ZW_policy)))
-    print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": Mean PAoI CU Policy: {:.4f}s".format(np.mean(PAoI_CU_policy)))
-    print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": Mean PAoI ZW Policy: {:.4f}s".format(np.mean(PAoI_ZW_policy)))
-    print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": PAoI CU Policy Variance: {:.4f}s".format(np.var(PAoI_CU_policy)))
-    print(datetime.datetime.now().strftime(dateFormat + "|" +timeFormat) + ": PAoI ZW Policy Variance: {:.4f}s".format(np.var(PAoI_ZW_policy)))
-
-    # Initialise variables
-    _min = 0 # tested 0.1
-    _max = 0.3 # tested 0.8
-    _step = 0.01
-    thres = np.arange(start=_min, stop=_max + _step, step=_step)
-
-    PAoI_violation_prob_CU_policy = [len(PAoI_CU_policy[PAoI_CU_policy>thres[i]])/len(PAoI_CU_policy) for i in range(len(thres))]
-    PAoI_violation_prob_ZW_policy = [len(PAoI_ZW_policy[PAoI_ZW_policy>thres[i]])/len(PAoI_ZW_policy) for i in range(len(thres))]
-
-    # Plot results
-    lines = plt.semilogy(
-        thres, PAoI_violation_prob_CU_policy,
-        thres, PAoI_violation_prob_ZW_policy,
-    )
-    plt.setp(lines[0], 'marker', 'o')
-    plt.setp(lines[1], 'marker', 's')
-
-    plt.legend(\
-        (lines[0], lines[1]), \
-        (
-            'CU Policy',
-            'ZW Policy',
-        ), fontsize=8, loc='best')
-    
-    plt.xlabel(r'Threshold (s)')
-    plt.ylabel("PAoI Violation Probability")
-    # plt.ylim(8e-4, 1e-1)
-    
-    plt.grid(True, which="both")
-    plt.savefig(fname = "./figures/plot_PAoI_violation_probability_vs_thres.eps", format="eps")
-    plt.show()
-
-##
 # This function runs the main function
 def main():
     # Initialise and start MQTT connection
@@ -301,15 +257,14 @@ if __name__ == '__main__':
             numSamples = config_dict["numSamples"]
             minSamples = config_dict["minSamples"]
     
-    service_times = np.arange(5.5, 10.1, 0.5)
+    service_times = np.arange(0.5, 10.1, 0.5)
     
     idx = 1
     while True:
         if idx > len(service_times):
             break
-        print(f"========================= {9 + idx} ==============================")
-        if idx == 9:
-        # if idx == 1:
+        print(f"========================= {idx} ==============================")
+        if idx == 1:
             if ZW_policy:
                 status_update_topic = status_update_topic + "/ZW"
             else:
@@ -325,9 +280,9 @@ if __name__ == '__main__':
             mat_filename = "CU_"
             service_time_filename = "CU_"
         
-        log_filename = log_filename + f"PAoI-{9 + idx}.txt"
-        mat_filename = mat_filename + f"PAoI-{9 + idx}.mat"
-        service_time_filename = service_time_filename + f'ServiceTime-{9 + idx}.txt'
+        log_filename = log_filename + f"PAoI-{idx}.txt"
+        mat_filename = mat_filename + f"PAoI-{idx}.mat"
+        service_time_filename = service_time_filename + f'ServiceTime-{idx}.txt'
         main()
         measurement_completed_flag.clear()
         idx += 1

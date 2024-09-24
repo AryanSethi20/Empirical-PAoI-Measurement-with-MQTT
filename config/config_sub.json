@@ -3,7 +3,7 @@
     "port": 1883,
     "status_update_topic": "artc1/status_update",
     "ack_topic": "artc1/ack",
-    "ZW_policy": false,
+    "ZW_policy": true,
     "config_dirpath": "./config",
     "empirical_dirpath": "./empirical_results",
     "config_filename": "config_sub.json",
@@ -11,5 +11,5 @@
     "mat_filename": "PAoI.mat",
     "service_time_filename": "ServiceTime.txt",
     "numSamples": 5000,
-    "minSamples": 200
+    "minSamples": 500
 }
